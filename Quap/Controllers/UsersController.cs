@@ -56,7 +56,7 @@ namespace TodoApi.Controllers
 
             if (loggedIn)
             {
-                return Ok();
+                return Ok(_userManagementService.getUserDetails(AuthRequest.username));
             }
             else
             {
