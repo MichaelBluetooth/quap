@@ -9,6 +9,7 @@ namespace Quap.Models.DTO
         public DateTime created { get; set; }
         public DateTime lastModified { get; set; }
         public string createdByUsername { get; set; }
+        public Guid createdByUserId { get; set; }
         public string title { get; set; }
         public string body { get; set; }
         public int votesCount { get; set; }

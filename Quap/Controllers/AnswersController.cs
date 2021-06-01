@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Quap.Models;
 using Quap.Models.DTO;
-using Quap.Permissions;
 using Quap.Services;
 using Quap.Services.QandA;
 
@@ -22,20 +21,16 @@ namespace Quap.Controllers
         private readonly IAnswerService _answerService;
         private readonly ILogger<AnswersController> _logger;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IAuthorizationService _authorizationService;
-
 
         public AnswersController(QuapDbContext ctx,
                                  IAnswerService answerService,
                                  ILogger<AnswersController> logger,
-                                 ICurrentUserService currentUserService,
-                                 IAuthorizationService authorizationService)
+                                 ICurrentUserService currentUserService)
         {
             _ctx = ctx;
             _answerService = answerService;
             _logger = logger;
             _currentUserService = currentUserService;
-            _authorizationService = authorizationService;
         }
 
         private AnswerDetail _getWithDetails(Guid id)
@@ -89,11 +84,9 @@ namespace Quap.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<AnswerDetail>> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateAnswerRequest req)
+        public ActionResult<AnswerDetail> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateAnswerRequest req)
         {
-            Answer answer = _ctx.Answers.Find(id);
-            AuthorizationResult authResult = await _authorizationService.AuthorizeAsync(User, answer, IsOwnerRequirement.name);
-            if (authResult.Succeeded)
+            if (_answerService.isAnswerOwner(req.questionId.Value))
             {
                 _answerService.updateAnswer(id, req);
                 return Ok(_getWithDetails(id));
@@ -122,11 +115,9 @@ namespace Quap.Controllers
 
         [HttpPost]
         [Route("accept")]
-        public async Task<ActionResult<QuestionDetail>> Accept([FromBody] AnswerAcceptRequest req)
+        public ActionResult<QuestionDetail> Accept([FromBody] AnswerAcceptRequest req)
         {
-            Question question = _ctx.Answers.Include(a => a.question).FirstOrDefault(a => a.id == req.answerId).question;
-            AuthorizationResult authResult = await _authorizationService.AuthorizeAsync(User, question, IsOwnerRequirement.name);
-            if (authResult.Succeeded)
+            if (_answerService.isQuestionOwner(req.answerId))
             {
                 Answer answer = _answerService.accept(req.answerId);
                 return Ok(_getWithDetails(req.answerId));
@@ -139,11 +130,9 @@ namespace Quap.Controllers
 
         [HttpPost]
         [Route("unaccept")]
-        public async Task<ActionResult<QuestionDetail>> Unaccept([FromBody] AnswerAcceptRequest req)
+        public ActionResult<QuestionDetail> Unaccept([FromBody] AnswerAcceptRequest req)
         {
-            Question question = _ctx.Answers.Include(a => a.question).FirstOrDefault(a => a.id == req.answerId).question;
-            AuthorizationResult authResult = await _authorizationService.AuthorizeAsync(User, question, IsOwnerRequirement.name);
-            if (authResult.Succeeded)
+            if (_answerService.isQuestionOwner(req.answerId))
             {
                 _answerService.unaccept(req.answerId);
                 return Ok(_getWithDetails(req.answerId));

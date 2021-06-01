@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using Quap.Permissions;
 
 namespace Quap.Models
 {
-    public class Answer : Post, IOwnerable
+    public class Answer : Post
     {
         public bool accepted { get; set; }
 

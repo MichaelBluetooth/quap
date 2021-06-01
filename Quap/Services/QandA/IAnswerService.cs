@@ -11,5 +11,7 @@ namespace Quap.Services.QandA
         AnswerVote vote(VoteRequest req);
         Answer accept(Guid id);
         Answer unaccept(Guid id);
+        bool isAnswerOwner(Guid id);
+        bool isQuestionOwner(Guid id);
     }
 }

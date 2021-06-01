@@ -29,7 +29,7 @@ namespace Quap.Services.UserManagement
             {
                 var claims = new List<Claim>
                 {
-                    new Claim(ClaimTypes.Name, user.username),
+                    new Claim(ClaimTypes.Name, user.username)
                     // new Claim(ClaimTypes.Role,  user.isAdmin ? "Administrator" : "General")
                 };
 

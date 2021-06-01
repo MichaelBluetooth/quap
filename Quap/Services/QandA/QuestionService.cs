@@ -162,6 +162,8 @@ namespace Quap.Services.QandA
                 query = query.Where(q => q.tags.Any(t => t.tag.name.Equals(tag, StringComparison.CurrentCultureIgnoreCase)));
             }
 
+            query = query.OrderByDescending(q => q.created);
+
             var count = query.Count();
             List<Question> questions = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
             
@@ -172,6 +174,7 @@ namespace Quap.Services.QandA
                 created = q.created,
                 lastModified = q.lastModified,
                 createdByUsername = q.createdBy.username,
+                createdByUserId = q.createdById.Value,
                 // answersCount = q.answers.Count(),
                 hasAcceptedAnswer = q.answers.Any(a => a.accepted),
                 tags = q.tags.Select(t => t.tag.name).ToList()
@@ -186,6 +189,11 @@ namespace Quap.Services.QandA
             }
 
             return new QuestionSearchResults(questionSummaries, count, pageNumber, pageSize);
+        }
+
+        public bool isQuestionOwner(Guid id)
+        {
+            return _context.Questions.Find(id).createdById == _currentUserService.CurrentUser.id;
         }
     }
 }

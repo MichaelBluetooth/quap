@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Quap.Models;
+using Quap.Models.DTO;
 using Quap.Services.UserManagement;
 
 namespace TodoApi.Controllers
@@ -47,7 +50,7 @@ namespace TodoApi.Controllers
         [HttpPost]
         [Route("login")]
         [AllowAnonymous]
-        public async Task<ActionResult> Login([FromBody] AuthRequest AuthRequest)
+        public async Task<ActionResult<UserDetails>> Login([FromBody] AuthRequest AuthRequest)
         {
             bool loggedIn = await _auth.login(AuthRequest);
 
@@ -68,6 +71,20 @@ namespace TodoApi.Controllers
             await _httpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             // await _auth.logout();
             return Ok();
+        }
+
+        [HttpGet]
+        [Route("{id}/details")]
+        public ActionResult<UserDetails> UserDetails(Guid id)
+        {
+            return Ok(_userManagementService.getUserDetails(id));
+        }
+
+        [HttpGet]
+        [Route("currentuser")]
+        public ActionResult<UserDetails> CurrentUser(Guid id)
+        {
+            return Ok(_userManagementService.getUserDetails(User.Identity.Name));
         }
     }
 }

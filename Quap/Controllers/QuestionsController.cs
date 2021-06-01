@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Quap.Models;
 using Quap.Models.DTO;
-using Quap.Permissions;
 using Quap.Services;
 using Quap.Services.QandA;
 
@@ -22,15 +21,13 @@ namespace Quap.Controllers
         private readonly IQuestionService _questionService;
         private readonly ILogger<QuestionsController> _logger;
         private readonly ICurrentUserService _currentUserService;
-        private readonly IAuthorizationService _authorizationService;
 
-        public QuestionsController(QuapDbContext ctx, IQuestionService questionService, ILogger<QuestionsController> logger, ICurrentUserService currentUserService, IAuthorizationService authorizationService)
+        public QuestionsController(QuapDbContext ctx, IQuestionService questionService, ILogger<QuestionsController> logger, ICurrentUserService currentUserService)
         {
             _ctx = ctx;
             _questionService = questionService;
             _logger = logger;
             _currentUserService = currentUserService;
-            _authorizationService = authorizationService;
         }
 
         private QuestionDetail _getWithDetails(Guid id)
@@ -50,6 +47,7 @@ namespace Quap.Controllers
                             {
                                 id = q.id,
                                 createdByUsername = q.createdBy.username,
+                                createdByUserId = q.createdById.Value,
                                 created = q.created,
                                 lastModified = q.lastModified,
                                 tags = q.tags.Select(t => t.tag.name).ToList(),
@@ -67,6 +65,7 @@ namespace Quap.Controllers
                                     votesCount = 0,
                                     comments = a.comments,
                                     createdByUsername = a.createdBy.username,
+                                    createdByUserId = a.createdById.Value,
                                     created = a.created,
                                     lastModified = a.lastModified
                                 }).OrderBy(a => a.accepted).ToList(),
@@ -118,11 +117,9 @@ namespace Quap.Controllers
         }
 
         [HttpPut]
-        public async Task<ActionResult<QuestionDetail>> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateQuestionRequest req)
+        public ActionResult<QuestionDetail> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateQuestionRequest req)
         {
-            Question question = _ctx.Questions.Find(id);
-            AuthorizationResult authResult = await _authorizationService.AuthorizeAsync(User, question, IsOwnerRequirement.name);
-            if (authResult.Succeeded)
+            if (_questionService.isQuestionOwner(id))
             {
                 Question updated = _questionService.updateQuestion(id, req);
                 return Ok(_getWithDetails(updated.id));
@@ -135,11 +132,9 @@ namespace Quap.Controllers
 
         [HttpDelete]
         [Route("{id}")]
-        public async Task<ActionResult<QuestionDetail>> Delete([FromRoute] Guid id)
+        public ActionResult<QuestionDetail> Delete([FromRoute] Guid id)
         {
-            Question question = _ctx.Questions.Find(id);
-            AuthorizationResult authResult = await _authorizationService.AuthorizeAsync(User, question, IsOwnerRequirement.name);
-            if (authResult.Succeeded)
+            if (_questionService.isQuestionOwner(id))
             {
                 _questionService.deleteQuestion(id);
                 return NoContent();

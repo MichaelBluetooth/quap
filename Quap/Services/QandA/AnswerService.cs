@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using Quap.Models;
 
 namespace Quap.Services.QandA
@@ -108,11 +109,21 @@ namespace Quap.Services.QandA
 
         public Answer unaccept(Guid id)
         {
-            Answer acceptMe = _context.Answers.Find(id);            
+            Answer acceptMe = _context.Answers.Find(id);
             acceptMe.accepted = false;
             _context.Answers.Update(acceptMe);
             _context.SaveChanges();
             return acceptMe;
+        }
+
+        public bool isAnswerOwner(Guid id)
+        {
+            return _context.Answers.Find(id).createdById == _currentUserService.CurrentUser.id;
+        }
+
+        public bool isQuestionOwner(Guid id)
+        {
+            return _context.Answers.Include(a => a.question).FirstOrDefault(a => a.id == id).question.createdById == _currentUserService.CurrentUser.id;
         }
     }
 }

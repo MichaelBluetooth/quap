@@ -11,7 +11,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Quap.Models;
-using Quap.Permissions;
 using Quap.Seed;
 using Quap.Services;
 using Quap.Services.QandA;
@@ -50,11 +49,7 @@ namespace Quap
                     options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
                 });
 
-            services.AddAuthorization(opts =>
-            {
-                opts.AddPolicy(IsQuestionOwnerRequirement.name, policy => policy.Requirements.Add(new IsQuestionOwnerRequirement()));
-                opts.AddPolicy(IsOwnerRequirement.name, policy => policy.Requirements.Add(new IsOwnerRequirement()));
-            });
+            services.AddAuthorization();
 
             services.AddSwaggerGen(c =>
             {
@@ -62,9 +57,6 @@ namespace Quap
             });
 
             services.AddTransient<IStartupFilter, SeedDataStartupFilter>();
-
-            services.AddScoped<IAuthorizationHandler, AnswerAcceptAuthorizationHandler>();
-            services.AddScoped<IAuthorizationHandler, IsOwnerAuthorizationHandler>();
 
             services.AddAutoMapper(typeof(Startup));
             services.AddHttpContextAccessor();
