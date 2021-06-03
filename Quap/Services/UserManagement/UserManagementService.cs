@@ -39,26 +39,30 @@ namespace Quap.Services.UserManagement
 
         public UserDetails getUserDetails(Guid id)
         {
-            return _context.Users.Select(u => new UserDetails()
-            {
-                id = u.id,
-                created = u.created,
-                email = u.email,
-                username = u.username,
-                answers = _context.Answers.Where(q => q.createdById == id).Include(a => a.question).Select(a => new UserAnswerSummary()
-                {
-                    id = a.id,
-                    title = a.question.title,
-                    created = a.created,
-                    questionId = a.questionId.Value
-                }).OrderByDescending(q => q.created).ToList(),
-                questions = _context.Questions.Where(q => q.createdById == id).Select(q => new UserQuestionSummary()
-                {
-                    id = q.id,
-                    title = q.title,
-                    created = q.created
-                }).OrderByDescending(q => q.created).ToList()
-            }).FirstOrDefault(u => u.id == id);
+            return _context.Users
+                .Include(u => u.questions)
+                .Include(u => u.answers)
+                    .ThenInclude(a => a.question)
+                .Select(u => new UserDetails(){
+                    id = u.id,
+                    created = u.created,
+                    email = u.email,
+                    username = u.username,
+                    answers = u.answers.Select(a => new UserAnswerSummary()
+                    {
+                        id = a.id,
+                        title = a.question.title,
+                        created = a.created,
+                        questionId = a.questionId.Value
+                    }).ToList(),
+                    questions = u.questions.Select(q => new UserQuestionSummary()
+                        {
+                            id = q.id,
+                            title = q.title,
+                            created = q.created
+                        }).ToList()
+                })
+                .FirstOrDefault(u => u.id == id);
         }
 
         public UserDetails getUserDetails(string username)

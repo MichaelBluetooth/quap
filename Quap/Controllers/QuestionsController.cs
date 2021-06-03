@@ -39,8 +39,10 @@ namespace Quap.Controllers
                                 .ThenInclude(a => a.createdBy)
                             .Include(q => q.answers)
                                 .ThenInclude(a => a.comments)
+                                    .ThenInclude(ac => ac.commenter)
                             .Include(q => q.createdBy)
                             .Include(q => q.comments)
+                                .ThenInclude(qc => qc.commenter)
                             .Include(q => q.tags)
                                 .ThenInclude(t => t.tag)
                             .Select(q => new QuestionDetail()
@@ -68,7 +70,7 @@ namespace Quap.Controllers
                                     createdByUserId = a.createdById.Value,
                                     created = a.created,
                                     lastModified = a.lastModified
-                                }).OrderBy(a => a.accepted).ToList(),
+                                }).OrderBy(a => a.accepted).ThenBy(a => a.created).ToList(),
                             })
                             .FirstOrDefault(q => q.id == id);
 
@@ -83,6 +85,8 @@ namespace Quap.Controllers
                                 _ctx.AnswerVotes.Any(v => v.answerId == aDetail.id && v.voterId == currentUser.id && v.voteType.Equals(VoteTypes.UPVOTE)) ? VoteTypes.UPVOTE : VoteTypes.NONE;
 
             }
+
+            detail.answers = detail.answers.OrderBy(a => a.accepted).ThenBy(a => a.votesCount).ThenBy(a => a.lastModified).ToList();
 
             return detail;
         }

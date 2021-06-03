@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
@@ -20,5 +21,8 @@ namespace Quap.Models
         [MinLength(8)]
         [JsonIgnore]
         public string password { get; set; }
+
+        public ICollection<Question> questions { get; set; }
+        public ICollection<Answer> answers { get; set; }
     }
 }
