@@ -13,5 +13,6 @@ namespace Quap.Services.QandA
         Answer unaccept(Guid id);
         bool isAnswerOwner(Guid id);
         bool isQuestionOwner(Guid id);
+        void delete(Guid id);
     }
 }

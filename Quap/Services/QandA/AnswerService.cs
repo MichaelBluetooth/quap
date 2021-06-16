@@ -125,5 +125,14 @@ namespace Quap.Services.QandA
         {
             return _context.Answers.Include(a => a.question).FirstOrDefault(a => a.id == id).question.createdById == _currentUserService.CurrentUser.id;
         }
+
+        public void delete(Guid id)
+        {
+            Answer answer = _context.Answers.Find(id);
+            if (null != answer)
+            {
+                _context.Answers.Remove(answer);
+            }
+        }
     }
 }

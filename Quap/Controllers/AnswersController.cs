@@ -142,5 +142,20 @@ namespace Quap.Controllers
                 return StatusCode(403, "Only the user who created the question may unaccept an answer for it.");
             }
         }
+
+        [HttpDelete]
+        [Route("{id}")]
+        public ActionResult<QuestionDetail> Delete([FromRoute] Guid id)
+        {
+            if (_answerService.isAnswerOwner(id))
+            {
+                _answerService.delete(id);
+                return NoContent();
+            }
+            else
+            {
+                return StatusCode(403, "Only the owner of the answer may delete it.");
+            }
+        }
     }
 }
