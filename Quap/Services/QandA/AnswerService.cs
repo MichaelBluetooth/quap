@@ -132,6 +132,7 @@ namespace Quap.Services.QandA
             if (null != answer)
             {
                 _context.Answers.Remove(answer);
+                _context.SaveChanges();
             }
         }
     }
