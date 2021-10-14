@@ -7,5 +7,6 @@ namespace Quap.Services
     {
         ClaimsPrincipal CurrentUserClaims { get; }
         User CurrentUser { get; }
+        bool isInRole(string role);
     }
 }

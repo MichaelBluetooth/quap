@@ -10,21 +10,26 @@ namespace Quap.Services.UserManagement
     public class UserManagementService : IUserManagementService
     {
         private readonly QuapDbContext _context;
+        private readonly ICurrentUserService _currentUser;
 
-        public UserManagementService(QuapDbContext context)
+        public UserManagementService(QuapDbContext context, ICurrentUserService currentUser)
         {
             _context = context;
+            _currentUser = currentUser;
         }
 
         public User register(RegisterRequest req)
         {
+            string newUserRole = _currentUser.isInRole(User.Roles.ADMIN) ? req.role : User.Roles.USER;
+
             User newUser = new User()
             {
                 username = req.username,
                 email = req.email,
                 password = BCrypt.Net.BCrypt.HashPassword(req.password),
                 created = DateTime.UtcNow,
-                lastModified = DateTime.UtcNow
+                lastModified = DateTime.UtcNow,
+                role = newUserRole
             };
             _context.Users.Add(newUser);
             _context.SaveChanges();
@@ -43,7 +48,8 @@ namespace Quap.Services.UserManagement
                 .Include(u => u.questions)
                 .Include(u => u.answers)
                     .ThenInclude(a => a.question)
-                .Select(u => new UserDetails(){
+                .Select(u => new UserDetails()
+                {
                     id = u.id,
                     created = u.created,
                     email = u.email,
@@ -56,11 +62,11 @@ namespace Quap.Services.UserManagement
                         questionId = a.questionId.Value
                     }).ToList(),
                     questions = u.questions.Select(q => new UserQuestionSummary()
-                        {
-                            id = q.id,
-                            title = q.title,
-                            created = q.created
-                        }).ToList()
+                    {
+                        id = q.id,
+                        title = q.title,
+                        created = q.created
+                    }).ToList()
                 })
                 .FirstOrDefault(u => u.id == id);
         }

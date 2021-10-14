@@ -16,8 +16,13 @@ namespace Quap.Services
             _ctx = ctx;
         }
 
-        public ClaimsPrincipal CurrentUserClaims => _httpContext.HttpContext.User;
+        public ClaimsPrincipal CurrentUserClaims => _httpContext.HttpContext?.User;
 
         public User CurrentUser => _ctx.Users.FirstOrDefault(u => u.username == _httpContext.HttpContext.User.Identity.Name);
+
+        public bool isInRole(string role)
+        {
+            return this.CurrentUserClaims?.IsInRole(role) ?? false;
+        }
     }
 }

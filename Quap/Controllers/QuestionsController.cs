@@ -120,7 +120,7 @@ namespace Quap.Controllers
             return CreatedAtAction(nameof(GetById), new { id = created.id }, _getWithDetails(created.id));
         }
 
-        [HttpPut]
+        [HttpPut("{id}")]
         public ActionResult<QuestionDetail> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateQuestionRequest req)
         {
             if (_questionService.isQuestionOwner(id))

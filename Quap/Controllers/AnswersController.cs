@@ -84,9 +84,10 @@ namespace Quap.Controllers
         }
 
         [HttpPut]
+        [Route("{id}")]
         public ActionResult<AnswerDetail> Put([FromRoute] Guid id, [FromBody] CreateOrUpdateAnswerRequest req)
         {
-            if (_answerService.isAnswerOwner(req.questionId.Value))
+            if (_answerService.isAnswerOwner(id))
             {
                 _answerService.updateAnswer(id, req);
                 return Ok(_getWithDetails(id));

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Quap.Models
 {
@@ -10,8 +11,8 @@ namespace Quap.Models
         public Guid? questionId { get; set; }
         public Question question { get; set; }
 
-        public ICollection<AnswerComment> comments { get; set; }
-        public ICollection<AnswerVote> votes { get; set; }
+        public ICollection<AnswerComment> comments { get; set; } = new Collection<AnswerComment>();
+        public ICollection<AnswerVote> votes { get; set; } = new Collection<AnswerVote>();
 
         public Guid getOwnerId()
         {

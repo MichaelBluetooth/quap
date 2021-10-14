@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace Quap.Models
@@ -8,7 +10,9 @@ namespace Quap.Models
         [MaxLength(150)]
         public string name { get; set; }
 
-        [MaxLength(256)]
+        [MaxLength(512)]
         public string description { get; set; }
+
+        public ICollection<QuestionTag> questions = new Collection<QuestionTag>();
     }
 }
